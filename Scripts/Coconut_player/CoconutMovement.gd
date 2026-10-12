@@ -4,7 +4,7 @@ class_name CoconutMovement
 
 var _body: CharacterBody3D
 var speed: float = 1.0
-var jump_velocity: float = 3.0
+var jump_velocity: float = 4.0
 
 func _init(body: CharacterBody3D) -> void:
 	_body = body
