@@ -87,6 +87,9 @@ func _on_broken() -> void:
 	
 	print("Кокос разбился!")
 	
+	# Переключаем трек ПЕРЕД перезапуском
+	MusicManager.next_track()
+	
 	# Снимаем паузу и перезагружаем сцену
 	get_tree().paused = false
 	get_tree().call_deferred("reload_current_scene")

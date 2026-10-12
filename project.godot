@@ -14,6 +14,10 @@ config/name="Coconut_project"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+MusicManager="*uid://bw0iu31vm60db"
+
 [display]
 
 window/stretch/mode="canvas_items"
