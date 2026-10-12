@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://e0fjfnc22nw7"]
+
+[ext_resource type="Script" uid="uid://7ygpjw1jh2j3" path="res://Scripts/platform_spawner.gd" id="1_kry3j"]
+[ext_resource type="PackedScene" uid="uid://6pbx1pjc3kfb" path="res://Scenes/coconut_player.tscn" id="2_8gbba"]
+[ext_resource type="PackedScene" uid="uid://dajuo6ipxafrj" path="res://Scenes/platform_full.tscn" id="2_21xkr"]
+[ext_resource type="AudioStream" uid="uid://c3ut0u2wsqc8r" path="res://Sounds/Music/Island Breeze.mp3" id="4_ynf5e"]
+[ext_resource type="AudioStream" uid="uid://ckurj4usdklp" path="res://Sounds/Music/Island Dash.mp3" id="5_hptm8"]
+[ext_resource type="AudioStream" uid="uid://b5wpt3knkjaui" path="res://Sounds/Music/Island Rush.mp3" id="6_d1ilt"]
+[ext_resource type="AudioStream" uid="uid://ptgsv7mp7i11" path="res://Sounds/Music/Tropic Bounce.mp3" id="7_6iyac"]
+[ext_resource type="AudioStream" uid="uid://c843if2n8xnki" path="res://Sounds/Music/Tropic Rush (1).mp3" id="8_fdnlq"]
+[ext_resource type="AudioStream" uid="uid://ca35qqto8qu0f" path="res://Sounds/Music/Tropic Rush.mp3" id="9_jkdf5"]
+
+[sub_resource type="AudioStreamPlaylist" id="AudioStreamPlaylist_xrivr"]
+stream_count = 6
+stream_0 = ExtResource("4_ynf5e")
+stream_1 = ExtResource("5_hptm8")
+stream_2 = ExtResource("6_d1ilt")
+stream_3 = ExtResource("7_6iyac")
+stream_4 = ExtResource("8_fdnlq")
+stream_5 = ExtResource("9_jkdf5")
+
+[node name="Main" type="Node3D" unique_id=469916794]
+
+[node name="Platform_spawner" type="Node3D" parent="." unique_id=1096002308 node_paths=PackedStringArray("player")]
+script = ExtResource("1_kry3j")
+platform_scene = ExtResource("2_21xkr")
+player = NodePath("../Coconut_player")
+
+[node name="Coconut_player" parent="." unique_id=1761751932 instance=ExtResource("2_8gbba")]
+transform = Transform3D(0.02, 0, 0, 0, 0.02, 0, 0, 0, 0.02, 0, 0.17422846, 0)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=390837417]
+stream = SubResource("AudioStreamPlaylist_xrivr")
+autoplay = true
