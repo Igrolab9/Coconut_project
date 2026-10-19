@@ -34,6 +34,11 @@ import/blender/enabled=false
 [global_group]
 
 Damagable_objects=""
+player=""
+
+[layer_names]
+
+3d_physics/layer_2="Coin"
 
 [physics]
 

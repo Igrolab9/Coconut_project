@@ -8,7 +8,7 @@
 radius = 2.6118164
 height = 6.541687
 
-[node name="Coconut_player" type="CharacterBody3D" unique_id=1761751932]
+[node name="Coconut_player" type="CharacterBody3D" unique_id=1761751932 groups=["player"]]
 transform = Transform3D(0.02, 0, 0, 0, 0.02, 0, 0, 0, 0.02, 0, 0, 0)
 script = ExtResource("1_is8ao")
 
@@ -37,3 +37,28 @@ mesh = ExtResource("1_ibvqb")
 [node name="MessageLabel" type="Label" parent="CanvasLayer" unique_id=1006732586]
 offset_right = 1149.0
 offset_bottom = 280.0
+
+[node name="CoinsLabel" type="Label" parent="CanvasLayer" unique_id=794286155]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="LeftButton" type="Button" parent="CanvasLayer" unique_id=1915532599]
+offset_left = 20.0
+offset_top = 611.0
+offset_right = 28.0
+offset_bottom = 619.0
+text = "Влево"
+
+[node name="RightButton2" type="Button" parent="CanvasLayer" unique_id=1458387964]
+offset_left = 92.0
+offset_top = 611.0
+offset_right = 160.0
+offset_bottom = 642.0
+text = "Вправо"
+
+[node name="JumpButton3" type="Button" parent="CanvasLayer" unique_id=1115344160]
+offset_left = 1063.0
+offset_top = 602.0
+offset_right = 1138.0
+offset_bottom = 633.0
+text = "Прыжок"

@@ -5,8 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://6pbx1pjc3kfb" path="res://Scenes/coconut_player.tscn" id="2_8gbba"]
 [ext_resource type="PackedScene" uid="uid://dajuo6ipxafrj" path="res://Scenes/platform_full.tscn" id="2_21xkr"]
 
-[sub_resource type="AudioStreamPlaylist" id="AudioStreamPlaylist_xrivr"]
-
 [node name="Main" type="Node3D" unique_id=469916794]
 script = ExtResource("1_jjvhh")
 
@@ -17,7 +15,3 @@ player = NodePath("../Coconut_player")
 
 [node name="Coconut_player" parent="." unique_id=1761751932 instance=ExtResource("2_8gbba")]
 transform = Transform3D(0.02, 0, 0, 0, 0.02, 0, 0, 0, 0.02, 0, 0.17422846, 0)
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=390837417]
-stream = SubResource("AudioStreamPlaylist_xrivr")
-autoplay = true

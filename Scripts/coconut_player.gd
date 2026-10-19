@@ -2,7 +2,7 @@
 extends CharacterBody3D
 
 @export var SPEED: float = 1.0
-@export var JUMP_VELOCITY: float = 3.0
+@export var JUMP_VELOCITY: float = 4.0
 @export var SPIN_BOOST: float = 6.0
 
 # === Настройки сообщения о смерти ===
@@ -10,13 +10,30 @@ extends CharacterBody3D
 @export var MESSAGE_TEXT: String = "Кокос разбился!"
 @export var MESSAGE_FONT_SIZE: int = 64
 @export var MESSAGE_COLOR: Color = Color.RED
-@export var MESSAGE_BG_COLOR: Color = Color(0, 0, 0, 0.7)  # полупрозрачный чёрный
+@export var MESSAGE_BG_COLOR: Color = Color(0, 0, 0, 0.7)
 @export var MESSAGE_DELAY: float = 3.0
+
+# === Настройки счётчика монет ===
+@export_group("Coin Counter Settings")
+@export var COIN_FONT_SIZE: int = 36
+@export var COIN_COLOR: Color = Color.GOLD
+
+# === Какие клавиши "нажимают" экранные кнопки ===
+@export_group("Simulated Keys")
+@export var SIM_KEY_LEFT: Key = KEY_LEFT
+@export var SIM_KEY_RIGHT: Key = KEY_RIGHT
+@export var SIM_KEY_JUMP: Key = KEY_SPACE
 # =====================================
 
 @onready var coconut_mesh: MeshInstance3D = $RollPivot/Coconut224Tris
 @onready var roll_pivot: Node3D = $RollPivot
 @onready var message_label: Label = $CanvasLayer/MessageLabel
+@onready var coin_label: Label = $CanvasLayer/CoinsLabel
+
+# ⭐ Экранные кнопки
+@onready var left_button: Button = $CanvasLayer/LeftButton
+@onready var right_button: Button = $CanvasLayer/RightButton2
+@onready var jump_button: Button = $CanvasLayer/JumpButton3
 
 # Компоненты
 var _movement: CoconutMovement
@@ -24,7 +41,12 @@ var _roller: CoconutRoller
 var _health: CoconutHealth
 var _collision_handler: CoconutCollisionHandler
 
+# ⭐ Счётчик собранных монет
+var coins_collected: int = 0
+
 func _ready() -> void:
+	add_to_group("player")
+	
 	# Инициализация логики
 	_health = CoconutHealth.new()
 	_health.broken.connect(_on_broken)
@@ -38,22 +60,80 @@ func _ready() -> void:
 	
 	_collision_handler = CoconutCollisionHandler.new(self, _health)
 	
-	# Настраиваем сообщение
+	# ⭐ Подключаем кнопки-симуляторы
+	_connect_ui_buttons()
+	
+	# Настраиваем UI
 	_apply_message_style()
+	_apply_coin_label_style()
+	_update_coin_label()
+
+# --- ⭐ Кнопки симулируют нажатия клавиш ---
+func _connect_ui_buttons() -> void:
+	left_button.button_down.connect(func() -> void: _simulate_key(SIM_KEY_LEFT, true))
+	left_button.button_up.connect(func() -> void: _simulate_key(SIM_KEY_LEFT, false))
+	
+	right_button.button_down.connect(func() -> void: _simulate_key(SIM_KEY_RIGHT, true))
+	right_button.button_up.connect(func() -> void: _simulate_key(SIM_KEY_RIGHT, false))
+	
+	jump_button.button_down.connect(func() -> void: _simulate_key(SIM_KEY_JUMP, true))
+	jump_button.button_up.connect(func() -> void: _simulate_key(SIM_KEY_JUMP, false))
+	
+	# Кнопки не должны перехватывать фокус клавиатуры
+	for btn: Button in [left_button, right_button, jump_button]:
+		btn.focus_mode = Control.FOCUS_NONE
+
+# --- ⭐ "Призрачное" нажатие клавиши ---
+func _simulate_key(keycode: Key, pressed: bool) -> void:
+	var event := InputEventKey.new()
+	event.keycode = keycode
+	event.physical_keycode = keycode  # работает и с is_key_pressed, и с is_physical_key_pressed
+	event.pressed = pressed
+	event.echo = false
+	Input.parse_input_event(event)
+
+# --- Отпускаем все виртуальные клавиши (защита от "залипания") ---
+func _release_all_sim_keys() -> void:
+	_simulate_key(SIM_KEY_LEFT, false)
+	_simulate_key(SIM_KEY_RIGHT, false)
+	_simulate_key(SIM_KEY_JUMP, false)
+
+func _exit_tree() -> void:
+	_release_all_sim_keys()
+
+func _physics_process(delta: float) -> void:
+	if _health.is_broken():
+		return
+	
+	# Никаких external_axis — компонент читает Input как обычно!
+	_movement.update(delta)
+	_roller.update(velocity, delta)
+	_collision_handler.check_collisions()
+
+# --- Методы монет и стиля без изменений ---
+func add_coin(value: int) -> void:
+	coins_collected += value
+	_update_coin_label()
+	print("💰 Всего монет у кокоса: ", coins_collected)
+
+func _update_coin_label() -> void:
+	coin_label.text = "🪙 x " + str(coins_collected)
+
+func _apply_coin_label_style() -> void:
+	coin_label.add_theme_font_size_override("font_size", COIN_FONT_SIZE)
+	coin_label.add_theme_color_override("font_color", COIN_COLOR)
+	coin_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	coin_label.add_theme_constant_override("outline_size", 8)
+	coin_label.position = Vector2(24, 24)
 
 func _apply_message_style() -> void:
 	message_label.visible = false
 	message_label.text = MESSAGE_TEXT
 	message_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	message_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	
-	# Размер шрифта (Godot 4 — через theme override)
 	message_label.add_theme_font_size_override("font_size", MESSAGE_FONT_SIZE)
-	
-	# Цвет текста
 	message_label.add_theme_color_override("font_color", MESSAGE_COLOR)
 	
-	# Цвет фона (если нужен) — через StyleBox
 	var style_box = StyleBoxFlat.new()
 	style_box.bg_color = MESSAGE_BG_COLOR
 	style_box.corner_radius_top_left = 10
@@ -66,30 +146,17 @@ func _apply_message_style() -> void:
 	style_box.content_margin_bottom = 20
 	message_label.add_theme_stylebox_override("normal", style_box)
 
-func _physics_process(delta: float) -> void:
-	if _health.is_broken():
-		return
-
-	# Делегируем задачи
-	_movement.update(delta)
-	_roller.update(velocity, delta)
-	_collision_handler.check_collisions()
-
 func _on_broken() -> void:
-	# Показываем сообщение
-	message_label.visible = true
+	_release_all_sim_keys()  # ⭐ отпускаем виртуальные клавиши до паузы
 	
-	# Ставим игру на паузу
+	message_label.visible = true
 	get_tree().paused = true
 	
-	# Таймер тикает даже во время паузы
 	await get_tree().create_timer(MESSAGE_DELAY, true).timeout
 	
-	print("Кокос разбился!")
+	print("Кокос разбился! Собрано монет за забег: ", coins_collected)
 	
-	# Переключаем трек ПЕРЕД перезапуском
 	MusicManager.next_track()
 	
-	# Снимаем паузу и перезагружаем сцену
 	get_tree().paused = false
-	get_tree().call_deferred("reload_current_scene")
+	get_tree().call_deferred("reload_current_scene")  # ⚠️ именно call_deferred!
