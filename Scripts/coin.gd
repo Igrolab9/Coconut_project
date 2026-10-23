@@ -15,7 +15,6 @@ func _on_body_entered(body: Node3D) -> void:
 	if collected:
 		return
 	if body.is_in_group("player"):
-		print("Coconut enter")
 		if body.has_method("add_coin"):
 			body.add_coin(score_value)
 		collect_coin()
