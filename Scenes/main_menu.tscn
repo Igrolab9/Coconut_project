@@ -35,3 +35,9 @@ offset_right = 606.0
 offset_bottom = 610.0
 scale = Vector2(1.6, 1.52)
 text = "Авторы"
+
+[node name="HighScoreLabel" type="Label" parent="." unique_id=1416098576]
+offset_left = 865.0
+offset_top = 22.0
+offset_right = 905.0
+offset_bottom = 45.0

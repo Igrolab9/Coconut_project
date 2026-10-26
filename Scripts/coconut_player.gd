@@ -147,21 +147,43 @@ func _apply_message_style() -> void:
 	style_box.content_margin_bottom = 20
 	message_label.add_theme_stylebox_override("normal", style_box)
 
+# Добавьте эту новую функцию в конец файла coconut_player.gd
+func _save_high_score_if_needed() -> void:
+	var config = ConfigFile.new()
+	var err = config.load("user://highscore.cfg")
+	var current_high_score = 0
+	
+	# Если файл уже существует, читаем текущий рекорд
+	if err == OK:
+		current_high_score = config.get_value("game", "high_score", 0)
+	
+	# Если собрали больше, чем было, сохраняем новый рекорд
+	if coins_collected > current_high_score:
+		config.set_value("game", "high_score", coins_collected)
+		config.save("user://highscore.cfg")
+		print("🏆 Новый рекорд сохранён: ", coins_collected)
+	else:
+		print("📊 Текущий рекорд: ", current_high_score, ". Собрано в этот раз: ", coins_collected)
+
+
+# Обновите существующую функцию _on_broken(), добавив одну строку:
 func _on_broken() -> void:
 	print("💥 Кокос разбился! Запускаем логику смерти...")
 	
 	# 1. Отпускаем виртуальные кнопки, чтобы они не "залипли" на паузе
 	_release_all_sim_keys()  
 	
-	# 2. Проигрываем звук (благодаря PROCESS_MODE_ALWAYS он заиграет даже на паузе)
+	# 2. Проигрываем звук
 	breack_sound.play()
 	
 	# 3. Показываем UI и ставим игру на паузу
 	message_label.visible = true
 	get_tree().paused = true
 	
-	# 4. Ждем 3 секунды. 
-	# (Флаг 'true' у таймера позволяет ему отсчитывать время, даже когда игра на паузе)
+	# ⭐ ДОБАВЬТЕ ЭТУ СТРОКУ: Проверяем и сохраняем рекорд монет ⭐
+	_save_high_score_if_needed()
+	
+	# 4. Ждем 3 секунды (таймер работает даже на паузе благодаря true)
 	await get_tree().create_timer(MESSAGE_DELAY, true).timeout
 	
 	# 5. Логика после паузы
@@ -170,4 +192,4 @@ func _on_broken() -> void:
 	
 	# 6. Снимаем паузу и перезагружаем сцену
 	get_tree().paused = false
-	get_tree().call_deferred("reload_current_scene")   # ⚠️ именно call_deferred!
+	get_tree().call_deferred("reload_current_scene")
