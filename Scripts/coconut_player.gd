@@ -29,6 +29,7 @@ extends CharacterBody3D
 @onready var roll_pivot: Node3D = $RollPivot
 @onready var message_label: Label = $CanvasLayer/MessageLabel
 @onready var coin_label: Label = $CanvasLayer/CoinsLabel
+@onready var breack_sound: AudioStreamPlayer3D = $AudioStreamPlayer3D
 
 # ⭐ Экранные кнопки
 @onready var left_button: Button = $CanvasLayer/LeftButton
@@ -46,7 +47,7 @@ var coins_collected: int = 0
 
 func _ready() -> void:
 	add_to_group("player")
-	
+	breack_sound.process_mode = Node.PROCESS_MODE_ALWAYS
 	# Инициализация логики
 	_health = CoconutHealth.new()
 	_health.broken.connect(_on_broken)
@@ -147,16 +148,26 @@ func _apply_message_style() -> void:
 	message_label.add_theme_stylebox_override("normal", style_box)
 
 func _on_broken() -> void:
-	_release_all_sim_keys()  # ⭐ отпускаем виртуальные клавиши до паузы
+	print("💥 Кокос разбился! Запускаем логику смерти...")
 	
+	# 1. Отпускаем виртуальные кнопки, чтобы они не "залипли" на паузе
+	_release_all_sim_keys()  
+	
+	# 2. Проигрываем звук (благодаря PROCESS_MODE_ALWAYS он заиграет даже на паузе)
+	breack_sound.play()
+	
+	# 3. Показываем UI и ставим игру на паузу
 	message_label.visible = true
 	get_tree().paused = true
 	
+	# 4. Ждем 3 секунды. 
+	# (Флаг 'true' у таймера позволяет ему отсчитывать время, даже когда игра на паузе)
 	await get_tree().create_timer(MESSAGE_DELAY, true).timeout
 	
-	print("Кокос разбился! Собрано монет за забег: ", coins_collected)
-	
+	# 5. Логика после паузы
+	print("Собрано монет за забег: ", coins_collected)
 	MusicManager.next_track()
 	
+	# 6. Снимаем паузу и перезагружаем сцену
 	get_tree().paused = false
-	get_tree().call_deferred("reload_current_scene")  # ⚠️ именно call_deferred!
+	get_tree().call_deferred("reload_current_scene")   # ⚠️ именно call_deferred!
